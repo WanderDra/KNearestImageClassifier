@@ -4,6 +4,7 @@ import numpy as np
 from util import KNNClassifier
 from util import ModelSaveTools as saver
 from util import ImageTool as it
+import matplotlib.pyplot as plt
 
 knn = KNNClassifier.KNNClassifier()
 
@@ -34,39 +35,81 @@ def testing_data_collect():
     return data_array
 
 
-def train():
+def train(k):
     data_array, labels_array = training_data_collect()
     knn_c = knn.get_classifier()
+    knn_c.n_neighbors = k
     data_train, data_test, labels_train, labels_test = knn.split(data_array, labels_array)
     sc = knn.get_scaler(data_train)
     sc_data_train = sc.transform(data_train)
     sc = knn.get_scaler(data_test)
     sc_data_test = sc.transform(data_test)
+
     knn_c.fit(sc_data_train, labels_train)
+
+    knn_graph = knn_c.kneighbors_graph(data_test, k, mode='distance')
+    print(knn_graph)
+    f = open('NeighborDistance_test.txt', 'w')
+    f.write(str(knn_graph))
+    f.close()
+
     print(knn_c.score(sc_data_train, labels_train))
     print(knn_c.score(sc_data_test, labels_test))
     saver.save(knn_c, 'TrainedKNNModel')
 
 
-def predict():
+def predict(id):
     knn_c = saver.load('TrainedKNNModel')
     data_array, labels_array = training_data_collect()
 
     test_data = testing_data_collect()
 
-    data = test_data[5486]
+    data = test_data[id]
     it.draw(data)
 
     sc = knn.get_scaler(test_data)
     sc_data = sc.transform(test_data)
     # print(knn_c.score(sc_data, labels_array))
 
-    print(knn_c.predict([sc_data[5486]]))
+    print(knn_c.predict([sc_data[id]]))
 
 
+def test():
+    knn_c = saver.load('TrainedKNNModel')
+    data_array, labels_array = training_data_collect()
 
-# train()
-predict()
+    test_data = data_array
+    test_labels = labels_array
+
+    sc = knn.get_scaler(test_data)
+    sc_data = sc.transform(test_data)
+
+    print(test_labels)
+
+    count = 0
+    correct = 0
+    result = knn_c.predict(sc_data)
+    print(result)
+    incorrect = []
+    for data in result:
+        if data == test_labels[count]:
+            correct += 1
+        else:
+            incorrect.append(count)
+        count += 1
+    accuracy = correct / len(sc_data)
+
+    print(accuracy)
+
+    # record incorrect data
+    f = open('Record.txt', 'w')
+    f.write(str(incorrect))
+    f.close()
+
+
+train(5)
+# predict(217)
+# test()
 
 
 # class Classifier:

@@ -4,7 +4,7 @@ from sklearn.neighbors import KNeighborsClassifier
 
 
 class KNNClassifier:
-    knn = KNeighborsClassifier(n_neighbors=3, n_jobs=-1)
+    knn = KNeighborsClassifier(n_neighbors=5, n_jobs=-1)
 
     def get_classifier(self):
         return self.knn
@@ -20,6 +20,9 @@ class KNNClassifier:
 
     def predict(self, data):
         return self.knn.predict(data)
+
+    def set_k(self, k):
+        self.knn.n_neighbors = k
 
 
 
