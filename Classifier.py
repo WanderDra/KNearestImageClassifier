@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 knn = KNNClassifier.KNNClassifier()
 
 
+# read training data
 def training_data_collect():
     table, row_num = reader.read_file('data_mnist.csv')
     length = len(table[1])
@@ -24,6 +25,7 @@ def training_data_collect():
     return data_array, labels_array
 
 
+# read testing data
 def testing_data_collect():
     table, row_num = reader.read_file('test_mnist.csv')
     length = len(table[1])
@@ -35,6 +37,7 @@ def testing_data_collect():
     return data_array
 
 
+# train KNN network
 def train(k):
     data_array, labels_array = training_data_collect()
     knn_c = knn.get_classifier()
@@ -58,9 +61,10 @@ def train(k):
     saver.save(knn_c, 'TrainedKNNModel')
 
 
+# manually check
 def predict(id):
     knn_c = saver.load('TrainedKNNModel')
-    data_array, labels_array = training_data_collect()
+    # data_array, labels_array = training_data_collect()
 
     test_data = testing_data_collect()
 
@@ -74,6 +78,7 @@ def predict(id):
     print(knn_c.predict([sc_data[id]]))
 
 
+# accuracy test and get actual incorrect result
 def test():
     knn_c = saver.load('TrainedKNNModel')
     data_array, labels_array = training_data_collect()
@@ -107,26 +112,44 @@ def test():
     f.close()
 
 
-train(5)
-# predict(217)
+# final output
+def final_result():
+    knn_c = saver.load('TrainedKNNModel')
+    test_data = testing_data_collect()
+
+    sc = knn.get_scaler(test_data)
+    sc_data = sc.transform(test_data)
+
+    result = knn_c.predict(sc_data)
+    id = 1
+    count = 0
+    filenum = 1
+    f = open('result' + str(filenum) + '.txt', 'w')
+    f.writelines('ImageId,Label\n')
+    for data in result:
+        if count < 10000:
+            f.writelines(str(id) + ',' + str(data) + '\n')
+            id += 1
+            count += 1
+        else:
+            filenum += 1
+            f.close()
+            f = open('result' + str(filenum) + '.txt', 'w')
+            f.writelines('ImageId,Label\n')
+            count = 0
+    f.close()
+
+    knn_graph = knn_c.kneighbors_graph(sc_data, 5, mode='distance')
+    print(knn_graph)
+
+    f = open('NeighborDistance_test.txt', 'w')
+    f.write(str(knn_graph))
+    f.close()
+
+
+
+## actions
+# train(5)
+# predict(7331)
 # test()
-
-
-# class Classifier:
-#     knn = KNeighborsClassifier(n_jobs=-1)
-#
-#     def classify(self):
-#         table = reader.read_file('data_mnist.csv')
-#         length = len(table[1])
-#         print(table[1][1:length])
-#         pass
-#
-#
-#
-# def main():
-#     c = Classifier()
-#     c.classify()
-
-
-# if __name__ == '__main__':
-#     main()
+final_result()
