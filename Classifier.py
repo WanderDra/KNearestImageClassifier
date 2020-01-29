@@ -43,10 +43,14 @@ def train(k):
     knn_c = knn.get_classifier()
     knn_c.n_neighbors = k
     data_train, data_test, labels_train, labels_test = knn.split(data_array, labels_array)
-    sc = knn.get_scaler(data_train)
-    sc_data_train = sc.transform(data_train)
-    sc = knn.get_scaler(data_test)
-    sc_data_test = sc.transform(data_test)
+    # sc = knn.get_scaler(data_train)
+    # sc_data_train = sc.transform(data_train)
+    # sc = knn.get_scaler(data_test)
+    # sc_data_test = sc.transform(data_test)
+    
+    sc_data_train = data_train
+    sc_data_test = data_test
+
 
     knn_c.fit(sc_data_train, labels_train)
 
@@ -149,7 +153,7 @@ def final_result():
 
 
 ## actions
-# train(5)
+train(5)
 # predict(7331)
 # test()
-final_result()
+# final_result()
